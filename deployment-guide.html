@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSE-Copilot Deployment Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: 2px solid white;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.4);
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 28px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .card h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .platform-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            padding: 25px;
+            color: white;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .platform-card h4 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .platform-card .features {
+            list-style: none;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .platform-card .features li:before {
+            content: "✓ ";
+            color: #00ff88;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .platform-card .cons {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            font-size: 13px;
+        }
+
+        .platform-card .cons li:before {
+            content: "⚠ ";
+            color: #ffaa00;
+        }
+
+        .code-block {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .code-block code {
+            color: #333;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+        }
+
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .comparison-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .check { color: #28a745; font-weight: bold; font-size: 18px; }
+        .cross { color: #dc3545; font-weight: bold; font-size: 18px; }
+        .partial { color: #ffc107; font-weight: bold; font-size: 14px; }
+
+        .step-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+
+        .step-box h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .step-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .recommended {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .recommended::before {
+            content: "⭐ RECOMMENDED";
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: #667eea;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .recommended h3 {
+            color: white;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .recommended ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .recommended ul li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .recommended ul li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .rating-stars {
+            color: #ffc107;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            opacity: 0.8;
+        }
+
+        .banner {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .platform-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-table {
+                font-size: 12px;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 8px;
+            }
+
+            .tabs-container {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 HSE-Copilot Deployment Guide</h1>
+            <p>View & Test Your App in Real-Time</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+            <button class="tab-btn" onclick="switchTab('platforms')">Cloud Platforms</button>
+            <button class="tab-btn" onclick="switchTab('docker')">Docker</button>
+            <button class="tab-btn" onclick="switchTab('comparison')">Comparison</button>
+            <button class="tab-btn" onclick="switchTab('render')">Quick Start (Render)</button>
+        </div>
+
+        <!-- TAB: Overview -->
+        <div id="overview" class="tab-content active">
+            <div class="card">
+                <h2>🌐 Deployment Options Overview</h2>
+                
+                <div class="banner">
+                    <p style="margin-bottom: 10px;"><strong>📌 Why Deploy?</strong></p>
+                    <p>Test your app in production environment, share with team, get real-time feedback, monitor performance.</p>
+                </div>
+
+                <h3>Available Deployment Methods</h3>
+                <p>Here are 6 powerful ways to deploy and test your HSE-Copilot application in real-time:</p>
+
+                <div style="margin: 30px 0; padding: 20px; background: #f0f4ff; border-radius: 8px;">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">1️⃣ Render (Recommended)</h4>
+                    <p style="margin-bottom: 10px;"><strong>Best for:</strong> Full-stack applications (Frontend + Backend + Database)</p>
+                    <p><strong>Cost:</strong> $0/month | <strong>Setup Time:</strong> 5 minutes | <strong>Difficulty:</strong> Very Easy</p>
+                </div>
+
+                <div style="margin: 30px 0; padding: 20px; background: #f0f4ff; border-radius: 8px;">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">2️⃣ Vercel + Render (Hybrid)</h4>
+                    <p style="margin-bottom: 10px;"><strong>Best for:</strong> Separate frontend and backend deployment</p>
+                    <p><strong>Cost:</strong> $0/month | <strong>Setup Time:</strong> 10 minutes | <strong>Difficulty:</strong> Easy</p>
+                </div>
+
+                <div style="margin: 30px 0; padding: 20px; background: #f0f4ff; border-radius: 8px;">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">3️⃣ AWS (Elastic Beanstalk)</h4>
+                    <p style="margin-bottom: 10px;"><strong>Best for:</strong> Professional applications, auto-scaling</p>
+                    <p><strong>Cost:</strong> Free tier + pay-as-you-go | <strong>Setup Time:</strong> 15 minutes | <strong>Difficulty:</strong> Moderate</p>
+                </div>
+
+                <div style="margin: 30px 0; padding: 20px; background: #f0f4ff; border-radius: 8px;">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">4️⃣ Google Cloud (Cloud Run)</h4>
+                    <p style="margin-bottom: 10px;"><strong>Best for:</strong> Containerized apps, serverless</p>
+                    <p><strong>Cost:</strong> $0 for 2M requests/month | <strong>Setup Time:</strong> 15 minutes | <strong>Difficulty:</strong> Moderate</p>
+                </div>
+
+                <div style="margin: 30px 0; padding: 20px; background: #f0f4ff; border-radius: 8px;">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">5️⃣ Azure App Service</h4>
+                    <p style="margin-bottom: 10px;"><strong>Best for:</strong> Enterprise deployments, full-stack</p>
+                    <p><strong>Cost:</strong> Free tier (12 months) | <strong>Setup Time:</strong> 10 minutes | <strong>Difficulty:</strong> Easy</p>
+                </div>
+
+                <div style="margin: 30px 0; padding: 20px; background: #f0f4ff; border-radius: 8px;">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">6️⃣ Docker (Universal)</h4>
+                    <p style="margin-bottom: 10px;"><strong>Best for:</strong> Portable deployments, any cloud provider</p>
+                    <p><strong>Cost:</strong> Depends on hosting | <strong>Setup Time:</strong> 20 minutes | <strong>Difficulty:</strong> Moderate</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Platforms -->
+        <div id="platforms" class="tab-content">
+            <div class="card">
+                <h2>☁️ Cloud Deployment Platforms</h2>
+
+                <h3>Render.com - Full Stack Deployment</h3>
+                <div class="platform-card" style="margin-bottom: 20px;">
+                    <h4>🔷 Render</h4>
+                    <ul class="features">
+                        <li>Full-stack support (Frontend + Backend + Database)</li>
+                        <li>Automatic deploys from GitHub</li>
+                        <li>Free tier with 750 compute hours/month</li>
+                        <li>Built-in PostgreSQL support</li>
+                        <li>Production-ready</li>
+                        <li>No credit card required initially</li>
+                    </ul>
+                    <ul class="cons">
+                        <li>May sleep after inactivity</li>
+                    </ul>
+                </div>
+
+                <h3>Vercel - Frontend Focused</h3>
+                <div class="platform-card" style="margin-bottom: 20px;">
+                    <h4>⚡ Vercel</h4>
+                    <ul class="features">
+                        <li>Perfect for React applications</li>
+                        <li>Lightning-fast CDN</li>
+                        <li>Unlimited free deployments</li>
+                        <li>Git integration with GitHub</li>
+                        <li>Serverless functions</li>
+                    </ul>
+                    <ul class="cons">
+                        <li>Best for frontend only</li>
+                        <li>Backend requires separate hosting</li>
+                    </ul>
+                </div>
+
+                <h3>AWS - Professional Grade</h3>
+                <div class="platform-card" style="margin-bottom: 20px;">
+                    <h4>🔶 AWS Elastic Beanstalk</h4>
+                    <ul class="features">
+                        <li>Auto-scaling capabilities</li>
+                        <li>Free tier available</li>
+                        <li>Enterprise-grade infrastructure</li>
+                        <li>Multiple deployment options</li>
+                        <li>Excellent support & documentation</li>
+                    </ul>
+                    <ul class="cons">
+                        <li>Steeper learning curve</li>
+                        <li>More complex setup</li>
+                    </ul>
+                </div>
+
+                <h3>Google Cloud - Serverless</h3>
+                <div class="platform-card" style="margin-bottom: 20px;">
+                    <h4>🔵 Google Cloud Run</h4>
+                    <ul class="features">
+                        <li>Completely serverless</li>
+                        <li>$0 for first 2M requests/month</li>
+                        <li>Container-based</li>
+                        <li>Pay-per-use pricing</li>
+                        <li>Auto-scaling</li>
+                    </ul>
+                    <ul class="cons">
+                        <li>Requires Docker knowledge</li>
+                    </ul>
+                </div>
+
+                <h3>Microsoft Azure - Enterprise</h3>
+                <div class="platform-card" style="margin-bottom: 20px;">
+                    <h4>🟢 Azure App Service</h4>
+                    <ul class="features">
+                        <li>Free tier (12 months)</li>
+                        <li>Full-stack support</li>
+                        <li>GitHub integration</li>
+                        <li>Easy scalability</li>
+                        <li>Enterprise features</li>
+                    </ul>
+                    <ul class="cons">
+                        <li>Free tier expires after 12 months</li>
+                    </ul>
+                </div>
+
+                <h3>Heroku - Classic Choice</h3>
+                <div class="platform-card" style="margin-bottom: 20px;">
+                    <h4>🟣 Heroku</h4>
+                    <ul class="features">
+                        <li>Simple deployment</li>
+                        <li>Built-in PostgreSQL</li>
+                        <li>Git push to deploy</li>
+                        <li>Great documentation</li>
+                    </ul>
+                    <ul class="cons">
+                        <li>Free tier being phased out</li>
+                        <li>Paid plans only</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Docker -->
+        <div id="docker" class="tab-content">
+            <div class="card">
+                <h2>🐳 Docker Containerization</h2>
+
+                <p>Docker allows you to package your entire application (Frontend + Backend + Database) into a container that can run anywhere.</p>
+
+                <h3>What is Docker?</h3>
+                <p>Docker creates a "container" with everything your app needs to run. It's like shipping your app in a box that works on any computer.</p>
+
+                <h3>Step 1: Create Backend Dockerfile</h3>
+                <p>Create a file named <code style="background: #f5f5f5; padding: 2px 6px; border-radius: 3px;">Dockerfile</code> in the <code>backend/</code> folder:</p>
+                <div class="code-block">
+FROM node:16<br>
+WORKDIR /app<br>
+COPY package*.json ./<br>
+RUN npm install<br>
+COPY . .<br>
+EXPOSE 5000<br>
+CMD ["npm", "run", "dev"]
+                </div>
+
+                <h3>Step 2: Create Frontend Dockerfile</h3>
+                <p>Create a file named <code style="background: #f5f5f5; padding: 2px 6px; border-radius: 3px;">Dockerfile</code> in the <code>frontend/</code> folder:</p>
+                <div class="code-block">
+FROM node:16 as build<br>
+WORKDIR /app<br>
+COPY package*.json ./<br>
+RUN npm install<br>
+COPY . .<br>
+RUN npm run build<br>
+<br>
+FROM node:16<br>
+WORKDIR /app<br>
+RUN npm i -g serve<br>
+COPY --from=build /app/build ./build<br>
+EXPOSE 3000<br>
+CMD ["serve", "-s", "build", "-l", "3000"]
+                </div>
+
+                <h3>Step 3: Create docker-compose.yml</h3>
+                <p>Create this file in your project root directory:</p>
+                <div class="code-block">
+version: '3.8'<br>
+services:<br>
+&nbsp;&nbsp;db:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;image: postgres:13<br>
+&nbsp;&nbsp;&nbsp;&nbsp;environment:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTGRES_PASSWORD: password<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTGRES_DB: hse_copilot<br>
+&nbsp;&nbsp;&nbsp;&nbsp;volumes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- postgres_data:/var/lib/postgresql/data<br>
+<br>
+&nbsp;&nbsp;backend:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;build: ./backend<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ports:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- "5000:5000"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;depends_on:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- db<br>
+&nbsp;&nbsp;&nbsp;&nbsp;environment:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DATABASE_URL: postgresql://postgres:password@db:5432/hse_copilot<br>
+<br>
+&nbsp;&nbsp;frontend:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;build: ./frontend<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ports:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- "3000:3000"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;depends_on:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- backend<br>
+<br>
+volumes:<br>
+&nbsp;&nbsp;postgres_data:
+                </div>
+
+                <h3>Step 4: Run with Docker</h3>
+                <div class="code-block">
+docker-compose up
+                </div>
+
+                <p style="margin-top: 20px;"><strong>That's it!</strong> Your entire app runs with one command.</p>
+
+                <h3>Deploy Docker Container Anywhere</h3>
+                <p>Once you have Docker setup, you can deploy to:</p>
+                <ul style="margin-left: 20px; color: #666;">
+                    <li>✓ Google Cloud Run</li>
+                    <li>✓ AWS ECS</li>
+                    <li>✓ Azure Container Instances</li>
+                    <li>✓ DigitalOcean</li>
+                    <li>✓ Heroku</li>
+                    <li>✓ Any VPS or dedicated server</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- TAB: Comparison -->
+        <div id="comparison" class="tab-content">
+            <div class="card">
+                <h2>📊 Platform Comparison Table</h2>
+
+                <div style="overflow-x: auto;">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Platform</th>
+                                <th>Frontend</th>
+                                <th>Backend</th>
+                                <th>Database</th>
+                                <th>Free Tier</th>
+                                <th>Setup Ease</th>
+                                <th>Best For</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Render</strong></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">Yes</span></td>
+                                <td>⭐⭐⭐⭐⭐</td>
+                                <td>Full-stack apps</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Vercel</strong></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="partial">⚠</span></td>
+                                <td><span class="cross">✗</span></td>
+                                <td><span class="check">Yes</span></td>
+                                <td>⭐⭐⭐⭐⭐</td>
+                                <td>React apps</td>
+                            </tr>
+                            <tr>
+                                <td><strong>AWS</strong></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">Yes</span></td>
+                                <td>⭐⭐⭐</td>
+                                <td>Enterprise</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Google Cloud</strong></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">Yes</span></td>
+                                <td>⭐⭐⭐</td>
+                                <td>Serverless</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Azure</strong></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">Yes</span></td>
+                                <td>⭐⭐⭐⭐</td>
+                                <td>Enterprise</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Heroku</strong></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="cross">Limited</span></td>
+                                <td>⭐⭐⭐⭐</td>
+                                <td>Quick demos</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Docker</strong></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">✓</span></td>
+                                <td><span class="check">Yes</span></td>
+                                <td>⭐⭐⭐⭐</td>
+                                <td>All cloud providers</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 style="margin-top: 40px;">Cost Breakdown</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+                    <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+                        <h4 style="color: #2e7d32; margin-bottom: 10px;">💚 Completely Free</h4>
+                        <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Always free tier:</p>
+                        <ul style="font-size: 13px; color: #666; list-style-position: inside;">
+                            <li>✓ Render - $0/month</li>
+                            <li>✓ Vercel - $0/month</li>
+                            <li>✓ Docker - $0/month</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                        <h4 style="color: #856404; margin-bottom: 10px;">💛 Free with Limits</h4>
+                        <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Limited free tier:</p>
+                        <ul style="font-size: 13px; color: #666; list-style-position: inside;">
+                            <li>✓ Google Cloud - 2M requests</li>
+                            <li>✓ Azure - 12 months free</li>
+                            <li>✓ AWS - Limited free tier</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #f8d7da; padding: 15px; border-radius: 8px; border-left: 4px solid #dc3545;">
+                        <h4 style="color: #721c24; margin-bottom: 10px;">💔 Paid Only</h4>
+                        <p style="font-size: 14px; color: #666; margin-bottom: 10px;">No free tier:</p>
+                        <ul style="font-size: 13px; color: #666; list-style-position: inside;">
+                            <li>✗ Heroku - Paid only</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Quick Start Render -->
+        <div id="render" class="tab-content">
+            <div class="card">
+                <h2>⚡ Quick Start: Deploy to Render</h2>
+
+                <div class="recommended">
+                    <h3>Why Render?</h3>
+                    <ul>
+                        <li>Complete solution (Frontend + Backend + Database)</li>
+                        <li>Absolutely free ($0/month)</li>
+                        <li>Takes only 5 minutes to setup</li>
+                        <li>Auto-deploys when you push to GitHub</li>
+                        <li>Production-ready</li>
+                    </ul>
+                </div>
+
+                <h3>Prerequisites</h3>
+                <ul style="margin-left: 20px; color: #666; line-height: 1.8;">
+                    <li>✓ GitHub account (free)</li>
+                    <li>✓ HSE-Copilot code pushed to GitHub</li>
+                    <li>✓ Render account (free signup)</li>
+                </ul>
+
+                <h3>Step 1: Sign Up on Render</h3>
+                <div class="step-box">
+                    <h4>1. Visit render.com</h4>
+                    <p>Go to <a href="https://render.com" style="color: #667eea; text-decoration: none; font-weight: bold;">https://render.com</a> and click <strong>"Sign Up"</strong></p>
+                </div>
+
+                <div class="step-box">
+                    <h4>2. Connect GitHub</h4>
+                    <p>Click <strong>"Sign up with GitHub"</strong> and authorize Render to access your repositories</p>
+                </div>
+
+                <h3>Step 2: Deploy Backend</h3>
+                <div class="step-box">
+                    <h4>Create Web Service</h4>
+                    <p><strong>Steps:</strong></p>
+                    <ol style="margin-left: 20px; color: #666; line-height: 1.8;">
+                        <li>Click <strong>"New +"</strong> button</li>
+                        <li>Select <strong>"Web Service"</strong></li>
+                        <li>Connect your <strong>HSE-Copilot GitHub repository</strong></li>
+                        <li>Choose <strong>"Node"</strong> as runtime</li>
+                        <li>Set these values:
+                            <div class="code-block" style="margin-top: 10px;">
+<strong>Name:</strong> hse-copilot-backend<br>
+<strong>Root Directory:</strong> backend<br>
+<strong>Build Command:</strong> npm install<br>
+<strong>Start Command:</strong> npm run dev
+                            </div>
+                        </li>
+                        <li>Add <strong>Environment Variables</strong> (click "Add Environment Variable"):
+                            <div class="code-block" style="margin-top: 10px;">
+DATABASE_URL: postgresql://postgres:password@localhost:5432/hse_copilot<br>
+JWT_SECRET: your_secret_key_here<br>
+NODE_ENV: production<br>
+API_URL: https://your-app.onrender.com<br>
+CLIENT_URL: https://your-app-frontend.onrender.com
+                            </div>
+                        </li>
+                        <li>Click <strong>"Create Web Service"</strong></li>
+                    </ol>
+                </div>
+
+                <h3>Step 3: Deploy Frontend</h3>
+                <div class="step-box">
+                    <h4>Create Another Web Service for Frontend</h4>
+                    <p><strong>Steps:</strong></p>
+                    <ol style="margin-left: 20px; color: #666; line-height: 1.8;">
+                        <li>Click <strong>"New +"</strong> again</li>
+                        <li>Select <strong>"Static Site"</strong> (or Web Service)</li>
+                        <li>Connect same GitHub repository</li>
+                        <li>Set these values:
+                            <div class="code-block" style="margin-top: 10px;">
+<strong>Name:</strong> hse-copilot-frontend<br>
+<strong>Root Directory:</strong> frontend<br>
+<strong>Build Command:</strong> npm install && npm run build<br>
+<strong>Publish Directory:</strong> build
+                            </div>
+                        </li>
+                        <li>Add environment variable:
+                            <div class="code-block" style="margin-top: 10px;">
+REACT_APP_API_URL: https://your-backend-url.onrender.com
+                            </div>
+                        </li>
+                        <li>Click <strong>"Create Static Site"</strong></li>
+                    </ol>
+                </div>
+
+                <h3>Step 4: Setup Database (PostgreSQL)</h3>
+                <div class="step-box">
+                    <h4>Option A: Use Render's PostgreSQL</h4>
+                    <p><strong>Steps:</strong></p>
+                    <ol style="margin-left: 20px; color: #666; line-height: 1.8;">
+                        <li>In Render dashboard, click <strong>"New +"</strong></li>
+                        <li>Select <strong>"PostgreSQL"</strong></li>
+                        <li>Fill in details:
+                            <div class="code-block" style="margin-top: 10px;">
+<strong>Name:</strong> hse-copilot-db<br>
+<strong>Database:</strong> hse_copilot<br>
+<strong>User:</strong> postgres<br>
+<strong>Region:</strong> (closest to you)
+                            </div>
+                        </li>
+                        <li>Click <strong>"Create Database"</strong></li>
+                        <li>Copy the <strong>Internal Database URL</strong></li>
+                        <li>Update backend's DATABASE_URL with this URL</li>
+                    </ol>
+                </div>
+
+                <div class="step-box">
+                    <h4>Option B: Use External Database</h4>
+                    <p>If you have an existing PostgreSQL database, just update the <strong>DATABASE_URL</strong> environment variable in your backend service.</p>
+                </div>
+
+                <h3>Step 5: Verify Deployment</h3>
+                <div class="step-box">
+                    <h4>Check Status</h4>
+                    <p>In Render dashboard, both services should show <strong>"Live"</strong> status</p>
+                    <p style="margin-top: 15px;"><strong>Access your app:</strong></p>
+                    <p>Frontend: https://your-app-frontend.onrender.com</p>
+                    <p>Backend: https://your-app-backend.onrender.com/api/health</p>
+                </div>
+
+                <h3>Step 6: Continuous Deployment</h3>
+                <div class="step-box">
+                    <h4>Auto-Deploy on GitHub Push</h4>
+                    <p>Render automatically deploys your app whenever you push to GitHub!</p>
+                    <div class="code-block" style="margin-top: 10px;">
+# Just push your changes to GitHub
+git add .
+git commit -m "New feature"
+git push origin main
+
+# Render automatically deploys! ✨
+                    </div>
+                </div>
+
+                <h3>✅ You're Done!</h3>
+                <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 4px solid #28a745; margin-top: 20px;">
+                    <p style="color: #2e7d32; font-weight: bold; margin-bottom: 10px;">🎉 Your app is live!</p>
+                    <p style="color: #666;">Share your app URL with your team. Visit your live URL to see your HSE-Copilot app in action.</p>
+                </div>
+
+                <h3 style="margin-top: 30px;">Troubleshooting</h3>
+                <div style="background: #fff3cd; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                    <p style="color: #856404; font-weight: bold; margin-bottom: 10px;">⚠ Build Failed?</p>
+                    <p style="color: #666; margin-bottom: 10px;">Click the service → "Logs" tab to see detailed error messages</p>
+                    <p style="color: #666; margin-bottom: 10px;"><strong>Common issues:</strong></p>
+                    <ul style="color: #666; margin-left: 20px;">
+                        <li>✓ Missing environment variables → Add them in Environment section</li>
+                        <li>✓ Database connection error → Check DATABASE_URL</li>
+                        <li>✓ Node modules error → Clear cache and redeploy</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p style="font-size: 16px; margin-bottom: 10px;">🚀 HSE-Copilot Deployment Guide</p>
+        <p>Deploy in 5 minutes • Zero cost • Production-ready</p>
+        <p style="font-size: 12px; margin-top: 20px;">Questions? Check Render documentation: <a href="https://render.com/docs" style="color: white; text-decoration: underline;">render.com/docs</a></p>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
